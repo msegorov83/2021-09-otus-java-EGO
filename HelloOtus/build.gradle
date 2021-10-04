@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id 'idea'
+    id "io.spring.dependency-management" version "1.0.11.RELEASE"
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+}
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+
+idea {
+    project {
+        languageLevel = 11
+    }
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+group 'ru.otus'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:2.5.4'
+    }
+}
+dependencies {
+
+    implementation 'com.google.guava:guava:30.1.1-jre'
+}
+
+shadowJar {
+    archiveBaseName.set('HelloOtus')
+    archiveVersion.set('0.1')
+    archiveClassifier.set('')
+    manifest {
+        attributes 'Main-Class': 'ru.otus.App'
+    }
+}
+
+apply plugin: "io.spring.dependency-management"
+tasks.build.dependsOn tasks.shadowJar
+
