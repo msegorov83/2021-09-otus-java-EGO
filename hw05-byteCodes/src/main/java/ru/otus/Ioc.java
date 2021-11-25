@@ -14,34 +14,45 @@ public class Ioc {
 
     static TestLoggingInterface createTestLoging() {
 
-
        InvocationHandler handler = new TestLoggingInvocationHandler(new TestLogging());
-        return (TestLoggingInterface) Proxy.newProxyInstance(Ioc.class.getClassLoader(),
+        TestLoggingInterface testLoggingInterface = (TestLoggingInterface) Proxy.newProxyInstance(Ioc.class.getClassLoader(),
                 new Class<?>[]{TestLoggingInterface.class}, handler);
+        return testLoggingInterface;
     }
 
-
     static class TestLoggingInvocationHandler implements InvocationHandler {
-        private final TestLoggingInterface testLogging;
-        private final Map<String, Method> methods = new HashMap<>();
+        private final Object target;
+        private final Map<String, Integer> methods = new HashMap<>();
 
-        TestLoggingInvocationHandler(TestLoggingInterface testLogging) {
-            this.testLogging = testLogging;
+        TestLoggingInvocationHandler(Object target) {
+            this.target = target;
         }
+
+         public Object getTestLogging() {
+             return target;
+         }
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if (method.isAnnotationPresent(Log.class)) {
-                System.out.println("executed method: " + method.getName() + " param: " + Arrays.stream(args).toList());
-                return method.invoke(testLogging, args);
+
+            methods.merge(method.getName(), 1 ,Integer::sum);
+            Class clazz = getTestLogging().getClass();
+            Method[] methods = clazz.getDeclaredMethods();
+            for (Method m : methods) {
+
+                if (m.isAnnotationPresent(Log.class) & m.getName().equals(method.getName()) & m.getParameterCount()==args.length) {
+                        System.out.println("executed method: " + method.getName() + " param: " + Arrays.stream(args).toList());
+                        return method.invoke(target, args);
+                }
             }
+
             return null;
         }
 
         @Override
         public String toString() {
-            return "DemoInvocationHandler{" +
-                    "testLogging=" + testLogging +
+            return "TestLoggingInvocationHandler{" +
+                    "target=" + target +
                     '}';
         }
 

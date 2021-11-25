@@ -27,6 +27,6 @@ public class TestLogging implements TestLoggingInterface {
 
     @Override
     public String toString() {
-        return "MyClassImpl{}";
+        return "TestLogging{}";
     }
 }
